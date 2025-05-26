@@ -22,19 +22,19 @@ This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64
 
 
 
-> Warning: The workflow builds raylib without examples or games for a clean SDK. The build automatically initiates after every 12 hours to provide Bleeding Edge Builds. It is NOT RECOMMENDED to use these for actual projects as these are highly experimental and can break the functionality.
+> [!Warning] The workflow builds raylib without examples or games for a clean SDK. The build automatically initiates after every 12 hours to provide Bleeding Edge Builds. It is NOT RECOMMENDED to use these for actual projects as these are highly experimental and can break the functionality.
 
-> Note: The build uses OpenGL ES 2 internally because raylib currently defaults to GLES2 on DRM.
+> [!Note] The build uses OpenGL ES 2 internally because raylib currently defaults to GLES2 on DRM.
 
 
 
 
 ---
 
-> Info: The workflow assumes availability of cross-toolchains on Ubuntu runners (gcc-arm-linux-gnueabihf and gcc-aarch64-linux-gnu). If you customize runners, ensure these packages are installed
+> [!Important] The workflow assumes availability of cross-toolchains on Ubuntu runners (gcc-arm-linux-gnueabihf and gcc-aarch64-linux-gnu). If you customize runners, ensure these packages are installed
 
 
-> Info: You can customize the workflow to add example builds or shared library outputs if needed. 
+> [!Info]: You can customize the workflow to add example builds or shared library outputs if needed. 
 
 
 ## Customization & Extending:
