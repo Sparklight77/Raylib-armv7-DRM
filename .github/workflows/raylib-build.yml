@@ -1,0 +1,66 @@
+name: Cross-Build Raylib ARMv7 + ARM64 (DRM)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-raylib:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv7, arm64]
+        include:
+          - arch: armv7
+            toolchain: Toolchain-armv7-linux-gnueabihf.cmake
+            triple: arm-linux-gnueabihf
+          - arch: arm64
+            toolchain: Toolchain-aarch64-linux-gnu.cmake
+            triple: aarch64-linux-gnu
+
+    name: Build raylib for ${{ matrix.arch }}
+    steps:
+    - name: Checkout this repo (toolchain files)
+      uses: actions/checkout@v4
+
+    - name: Clone raylib (shallow)
+      run: git clone --depth 1 https://github.com/raysan5/raylib.git
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build git tar \
+          gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
+          libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev
+
+    - name: Build raylib for ${{ matrix.arch }}
+      run: |
+        mkdir build-${{ matrix.arch }}
+        cd build-${{ matrix.arch }}
+        cmake ../raylib \
+          -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DPLATFORM=DRM \
+          -DUSE_OPENGL_ES=ON \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_GAMES=OFF \
+          -G Ninja
+        ninja
+
+    - name: Prepare SDK package
+      run: |
+        mkdir -p raylib-${{ matrix.arch }}/include
+        mkdir -p raylib-${{ matrix.arch }}/lib
+        cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
+        cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
+        DATE=$(date +"%d-%m-%Y")
+        tar -czf "Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz" raylib-${{ matrix.arch }}
+
+    - name: Upload SDK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Raylib-${{ matrix.arch }}-DRM SDK
+        path: Raylib-${{ matrix.arch }}-DRM (*.tar.gz)
