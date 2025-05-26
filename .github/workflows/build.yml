@@ -28,12 +28,25 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo dpkg --add-architecture armhf
+        sudo dpkg --add-architecture arm64
         sudo apt-get update
+
+        if [ "${{ matrix.arch }}" = "armv7" ]; then
+          sudo apt-get install -y \
+            gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+            libgles2-mesa-dev:armhf libegl1-mesa-dev:armhf \
+            libgbm-dev:armhf libdrm-dev:armhf
+        else
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+            libgles2-mesa-dev:arm64 libegl1-mesa-dev:arm64 \
+            libgbm-dev:arm64 libdrm-dev:arm64
+        fi
+
         sudo apt-get install -y \
-          cmake ninja-build make git \
-          gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-          libdrm-dev libgbm-dev libinput-dev \
-          libgles2-mesa-dev
+          cmake ninja-build make git
+
 
     - name: Create build directory
       run: mkdir build-${{ matrix.arch }}
