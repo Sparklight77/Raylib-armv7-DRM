@@ -21,48 +21,48 @@ jobs:
 
     name: Build raylib for ${{ matrix.arch }}
     steps:
-    - name: Checkout this repo (toolchain files)
-      uses: actions/checkout@v4
+      - name: Checkout this repo (toolchain files)
+        uses: actions/checkout@v4
 
-    - name: Clone raylib (shallow)
-      run: git clone --depth 1 https://github.com/raysan5/raylib.git
+      - name: Clone raylib (shallow)
+        run: git clone --depth 1 https://github.com/raysan5/raylib.git
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          cmake ninja-build git tar \
-          gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-          libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build git tar \
+            gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
+            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev
 
-    - name: Build raylib for ${{ matrix.arch }}
-      run: |
-        mkdir build-${{ matrix.arch }}
-        cd build-${{ matrix.arch }}
-        cmake ../raylib \
-          -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DPLATFORM=DRM \
-          -DUSE_OPENGL_ES=ON \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DBUILD_EXAMPLES=OFF \
-          -DBUILD_GAMES=OFF \
-          -G Ninja
-        ninja
+      - name: Build raylib for ${{ matrix.arch }}
+        run: |
+          mkdir build-${{ matrix.arch }}
+          cd build-${{ matrix.arch }}
+          cmake ../raylib \
+            -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPLATFORM=DRM \
+            -DUSE_OPENGL_ES=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_GAMES=OFF \
+            -G Ninja
+          ninja
 
-    - name: Prepare SDK package
-      run: |
-      mkdir -p raylib-${{ matrix.arch }}/include
-      mkdir -p raylib-${{ matrix.arch }}/lib
-      cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
-      cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
-      DATE=$(date +"%d-%m-%Y")
-      FILENAME="Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz"
-      tar -czf "$FILENAME" raylib-${{ matrix.arch }}
-      echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
+      - name: Prepare SDK package
+        run: |
+          mkdir -p raylib-${{ matrix.arch }}/include
+          mkdir -p raylib-${{ matrix.arch }}/lib
+          cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
+          cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
+          DATE=$(date +"%d-%m-%Y")
+          FILENAME="Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz"
+          tar -czf "$FILENAME" raylib-${{ matrix.arch }}
+          echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
 
-   - name: Upload SDK artifact
-     uses: actions/upload-artifact@v4
-     with:
-      name: Raylib-${{ matrix.arch }}-DRM SDK
-      path: ${{ env.SDK_FILENAME }}
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Raylib-${{ matrix.arch }}-DRM SDK
+          path: ${{ env.SDK_FILENAME }}
