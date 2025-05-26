@@ -5,26 +5,17 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write  # do not change, it is Needed to push releases
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build & Release raylib ARMv7 DRM
+    name: Build raylib ARMv7
 
     steps:
-    - name: Checkout this repo (for toolchain)
+    - name: Checkout (toolchain & script)
       uses: actions/checkout@v4
 
     - name: Clone raylib (shallow)
       run: git clone --depth 1 https://github.com/raysan5/raylib.git
-
-    - name: Extract raylib version
-      id: get_version
-      run: |
-        version=$(grep "#define RAYLIB_VERSION" raylib/src/raylib.h | awk '{print $3}' | tr -d '"')
-        echo "version=${version}" >> $GITHUB_OUTPUT
 
     - name: Install dependencies
       run: |
@@ -55,16 +46,17 @@ jobs:
       working-directory: build-raylib
       run: ninja
 
-    - name: Rename artifact
+    - name: Package build output
       run: |
-        mkdir dist
-        cp build-raylib/raylib/libraylib.a dist/libraylib-armv7-drm.a
+        DATE=$(date +"%d-%m-%Y")
+        mkdir -p raylib-package/include
+        cp -r raylib/src/*.h raylib-package/include/
+        cp -r raylib/src/external raylib-package/include/
+        cp build-raylib/raylib/libraylib.a raylib-package/
+        tar -czf "Raylib-armv7-DRM ($DATE).tar.gz" -C raylib-package .
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
-        tag_name: Raylib-armv7-DRM-${{ steps.get_version.outputs.version }}
-        name: Raylib-armv7-DRM ${{ steps.get_version.outputs.version }}
-        files: dist/libraylib-armv7-drm.a
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: Raylib-armv7-DRM
+        path: Raylib-armv7-DRM (*).tar.gz
