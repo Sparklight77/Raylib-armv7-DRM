@@ -1,0 +1,53 @@
+name: Cross-build raylib ARMv7 DRM
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build raylib ARMv7
+
+    steps:
+    - name: Checkout this repo (for toolchain file)
+      uses: actions/checkout@v4
+
+    - name: Clone raylib (shallow)
+      run: git clone --depth 1 https://github.com/raysan5/raylib.git
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build make git \
+          gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+          libdrm-dev libgbm-dev libinput-dev \
+          libgles2-mesa-dev
+
+    - name: Create build directory
+      run: mkdir build-raylib
+
+    - name: Configure CMake
+      working-directory: build-raylib
+      run: |
+        cmake ../raylib \
+          -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-armv7-linux-gnueabihf.cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DPLATFORM=DRM \
+          -DUSE_OPENGL_ES=ON \
+          -DBUILD_EXAMPLES=OFF \
+          -DBUILD_GAMES=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -G Ninja
+
+    - name: Build raylib
+      working-directory: build-raylib
+      run: ninja
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: raylib-armv7-drm
+        path: build-raylib/raylib/libraylib.a
