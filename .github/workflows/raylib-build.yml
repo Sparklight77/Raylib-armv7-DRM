@@ -51,7 +51,7 @@ jobs:
         ninja
 
     - name: Prepare SDK package
-  run: |
+       run: |
     mkdir -p raylib-${{ matrix.arch }}/include
     mkdir -p raylib-${{ matrix.arch }}/lib
     cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
