@@ -51,18 +51,18 @@ jobs:
         ninja
 
     - name: Prepare SDK package
-       run: |
-    mkdir -p raylib-${{ matrix.arch }}/include
-    mkdir -p raylib-${{ matrix.arch }}/lib
-    cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
-    cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
-    DATE=$(date +"%d-%m-%Y")
-    FILENAME="Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz"
-    tar -czf "$FILENAME" raylib-${{ matrix.arch }}
-    echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
+      run: |
+      mkdir -p raylib-${{ matrix.arch }}/include
+      mkdir -p raylib-${{ matrix.arch }}/lib
+      cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
+      cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
+      DATE=$(date +"%d-%m-%Y")
+      FILENAME="Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz"
+      tar -czf "$FILENAME" raylib-${{ matrix.arch }}
+      echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
 
    - name: Upload SDK artifact
-  uses: actions/upload-artifact@v4
-  with:
-    name: Raylib-${{ matrix.arch }}-DRM SDK
-    path: ${{ env.SDK_FILENAME }}
+     uses: actions/upload-artifact@v4
+     with:
+      name: Raylib-${{ matrix.arch }}-DRM SDK
+      path: ${{ env.SDK_FILENAME }}
