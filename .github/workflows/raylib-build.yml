@@ -61,7 +61,7 @@ jobs:
     tar -czf "$FILENAME" raylib-${{ matrix.arch }}
     echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
 
-- name: Upload SDK artifact
+   - name: Upload SDK artifact
   uses: actions/upload-artifact@v4
   with:
     name: Raylib-${{ matrix.arch }}-DRM SDK
