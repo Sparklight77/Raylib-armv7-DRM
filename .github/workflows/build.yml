@@ -1,4 +1,4 @@
-name: Cross-build raylib ARMv7 DRM
+name: Cross-build raylib ARM DRM
 
 on:
   push:
@@ -8,7 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build raylib ARMv7
+    strategy:
+      matrix:
+        arch:
+          - { name: "armv7", cc: "arm-linux-gnueabihf-gcc", cxx: "arm-linux-gnueabihf-g++" }
+          - { name: "arm64", cc: "aarch64-linux-gnu-gcc", cxx: "aarch64-linux-gnu-g++" }
 
     steps:
     - name: Checkout (toolchain & script)
@@ -23,40 +27,60 @@ jobs:
         sudo apt-get install -y \
           cmake ninja-build make git \
           gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+          gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
           libdrm-dev libgbm-dev libinput-dev \
           libgles2-mesa-dev
 
-    - name: Create build directory
-      run: mkdir build-raylib
-
-    - name: Configure CMake
-      working-directory: build-raylib
+    - name: Configure and Build raylib
+      env:
+        CC: ${{ matrix.arch.cc }}
+        CXX: ${{ matrix.arch.cxx }}
       run: |
+        mkdir build
+        cd build
         cmake ../raylib \
-          -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-armv7-linux-gnueabihf.cmake \
+          -DCMAKE_C_COMPILER=${{ matrix.arch.cc }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.arch.cxx }} \
           -DCMAKE_BUILD_TYPE=Release \
           -DPLATFORM=DRM \
           -DUSE_OPENGL_ES=ON \
           -DBUILD_EXAMPLES=OFF \
           -DBUILD_GAMES=OFF \
-          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_SHARED_LIBS=ON \
           -G Ninja
+        ninja
 
-    - name: Build raylib
-      working-directory: build-raylib
-      run: ninja
-
-    - name: Package build output
+    - name: Prepare SDK folder
       run: |
         DATE=$(date +"%d-%m-%Y")
-        mkdir -p raylib-package/include
-        cp -r raylib/src/*.h raylib-package/include/
-        cp -r raylib/src/external raylib-package/include/
-        cp build-raylib/raylib/libraylib.a raylib-package/
-        tar -czf "Raylib-armv7-DRM ($DATE).tar.gz" -C raylib-package .
+        SDK_DIR=Raylib-${{ matrix.arch.name }}-DRM\ $DATE
+        mkdir -p "$SDK_DIR"/{include,lib}
 
-    - name: Upload artifact
+        # Copy headers
+        cp raylib/src/raylib.h "$SDK_DIR/include/"
+        cp raylib/src/raymath.h "$SDK_DIR/include/"
+        cp raylib/src/rlgl.h "$SDK_DIR/include/"
+
+        # Copy shared and static libs
+        cp build/raylib/libraylib.a "$SDK_DIR/lib/"
+        cp build/raylib/libraylib.so "$SDK_DIR/lib/"
+        cp build/raylib/libraylib.so.* "$SDK_DIR/lib/"
+
+        # Create symlinks
+        cd "$SDK_DIR/lib"
+        ln -sf libraylib.so.5.5.0 libraylib.so.550
+        ln -sf libraylib.so.550 libraylib.so
+        cd -
+
+        # Copy license
+        cp raylib/LICENSE "$SDK_DIR/"
+        echo "raylib prebuilt SDK for ${{ matrix.arch.name }} with DRM and OpenGL ES" > "$SDK_DIR/README.md"
+
+        # Package
+        tar -czf "$SDK_DIR.tar.gz" "$SDK_DIR"
+
+    - name: Upload SDK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Raylib-armv7-DRM
-        path: Raylib-armv7-DRM (*).tar.gz
+        name: Raylib-${{ matrix.arch.name }}-DRM
+        path: Raylib-${{ matrix.arch.name }}-DRM (*.tar.gz)
