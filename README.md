@@ -20,16 +20,7 @@ This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64
 
 ---
 
-Repository Structure
 
-├── .github/workflows/build-raylib.yml      # GitHub Actions workflow
-├── cmake/
-│   ├── Toolchain-armv7-linux-gnueabihf.cmake
-│   └── Toolchain-aarch64-linux-gnu.cmake
-└── README.md
-
-
----
 
 > Warning: The workflow builds raylib without examples or games for a clean SDK. The build automatically initiates after every 12 hours to provide Bleeding Edge Builds. It is NOT RECOMMENDED to use these for actual projects as these are highly experimental and can break the functionality.
 
@@ -41,14 +32,6 @@ Repository Structure
 ---
 
 > Info: The workflow assumes availability of cross-toolchains on Ubuntu runners (gcc-arm-linux-gnueabihf and gcc-aarch64-linux-gnu). If you customize runners, ensure these packages are installed
-
-
-> Info: The tarball contains the following structure:
-
-raylib-<arch>/
-├── include/    # Header files (.h)
-└── lib/        # Static library libraylib.a
-
 
 
 > Info: You can customize the workflow to add example builds or shared library outputs if needed. 
