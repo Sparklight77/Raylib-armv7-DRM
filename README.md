@@ -54,7 +54,9 @@ raylib-<arch>/
 > Info: You can customize the workflow to add example builds or shared library outputs if needed. 
 
 
-Customization & Extending:
+## Customization & Extending:
+
+
 -$ Add BUILD_EXAMPLES=ON in CMake config step to build examples.
 
 
