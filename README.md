@@ -40,14 +40,8 @@ Repository Structure
 
 ---
 
-Warnings
+> Info: The workflow assumes availability of cross-toolchains on Ubuntu runners (gcc-arm-linux-gnueabihf and gcc-aarch64-linux-gnu). If you customize runners, ensure these packages are installed
 
-> Warning: The workflow assumes availability of cross-toolchains on Ubuntu runners (gcc-arm-linux-gnueabihf and gcc-aarch64-linux-gnu). If you customize runners, ensure these packages are installed.
-
-
----
-
-Info
 
 > Info: The tarball contains the following structure:
 
