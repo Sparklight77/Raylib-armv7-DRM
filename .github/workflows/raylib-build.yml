@@ -1,4 +1,4 @@
-name: Cross-Build Raylib ARMv7 + ARM64 (DRM)
+name: Cross-Build Raylib ARMv7 + ARM64 (DRM + X11)
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
             toolchain: Toolchain-aarch64-linux-gnu.cmake
             triple: aarch64-linux-gnu
 
-    name: Build raylib for ${{ matrix.arch }}
+    name: Build raylib DRM + X11 for ${{ matrix.arch }}
     steps:
       - name: Checkout this repo (toolchain files)
         uses: actions/checkout@v4
@@ -33,12 +33,13 @@ jobs:
           sudo apt-get install -y \
             cmake ninja-build git tar \
             gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev
+            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev
 
-      - name: Build raylib for ${{ matrix.arch }}
+      - name: Build DRM version
         run: |
-          mkdir build-${{ matrix.arch }}
-          cd build-${{ matrix.arch }}
+          mkdir build-${{ matrix.arch }}-drm
+          cd build-${{ matrix.arch }}-drm
           cmake ../raylib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
             -DCMAKE_BUILD_TYPE=Release \
@@ -50,19 +51,39 @@ jobs:
             -G Ninja
           ninja
 
+      - name: Build X11 version
+        run: |
+          mkdir build-${{ matrix.arch }}-x11
+          cd build-${{ matrix.arch }}-x11
+          cmake ../raylib \
+            -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPLATFORM=PLATFORM_DESKTOP \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_GAMES=OFF \
+            -G Ninja
+          ninja
+
       - name: Prepare SDK package
         run: |
-          mkdir -p raylib-${{ matrix.arch }}/include
-          mkdir -p raylib-${{ matrix.arch }}/lib
-          cp -r raylib/src/*.h raylib-${{ matrix.arch }}/include/
-          cp build-${{ matrix.arch }}/raylib/libraylib.a raylib-${{ matrix.arch }}/lib/
+          mkdir -p raylib-${{ matrix.arch }}-DRM/include
+          mkdir -p raylib-${{ matrix.arch }}-DRM/lib
+          cp -r raylib/src/*.h raylib-${{ matrix.arch }}-DRM/include/
+          cp build-${{ matrix.arch }}-drm/raylib/libraylib.a raylib-${{ matrix.arch }}-DRM/lib/
+
+          mkdir -p raylib-${{ matrix.arch }}-X11/include
+          mkdir -p raylib-${{ matrix.arch }}-X11/lib
+          cp -r raylib/src/*.h raylib-${{ matrix.arch }}-X11/include/
+          cp build-${{ matrix.arch }}-x11/raylib/libraylib.a raylib-${{ matrix.arch }}-X11/lib/
+
           DATE=$(date +"%d-%m-%Y")
-          FILENAME="Raylib-${{ matrix.arch }}-DRM (${DATE}).tar.gz"
-          tar -czf "$FILENAME" raylib-${{ matrix.arch }}
+          FILENAME="Raylib-${{ matrix.arch }}-DRM+X11 (${DATE}).tar.gz"
+          tar -czf "$FILENAME" raylib-${{ matrix.arch }}-DRM raylib-${{ matrix.arch }}-X11
           echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
 
       - name: Upload SDK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Raylib-${{ matrix.arch }}-DRM SDK
+          name: Raylib-${{ matrix.arch }} SDK (DRM + X11)
           path: ${{ env.SDK_FILENAME }}
