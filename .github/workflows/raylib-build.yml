@@ -58,7 +58,7 @@ jobs:
           cmake ../raylib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
             -DCMAKE_BUILD_TYPE=Release \
-            -DPLATFORM=PLATFORM_DESKTOP \
+            -DPLATFORM=Desktop \
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_EXAMPLES=OFF \
             -DBUILD_GAMES=OFF \
