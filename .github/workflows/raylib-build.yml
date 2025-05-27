@@ -29,12 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-    sudo apt-get update
-    sudo apt-get install -y \
-      cmake ninja-build git tar \
-      gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-      libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-      libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxext-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build git tar \
+            gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
+            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxext-dev
 
       - name: Build DRM version
         run: |
@@ -58,7 +58,7 @@ jobs:
           cmake ../raylib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
             -DCMAKE_BUILD_TYPE=Release \
-            -DPLATFORM=Desktop \
+            -DPLATFORM=PLATFORM_DESKTOP \
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_EXAMPLES=OFF \
             -DBUILD_GAMES=OFF \
