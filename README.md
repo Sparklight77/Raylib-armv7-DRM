@@ -17,8 +17,13 @@ This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64
 ---
 
 ## ⏬Download: 
-[Release](https://github.com/Sparklight77/raylib-arm/releases/tag/arm-5.5)
+- [Release v5.5](https://github.com/Sparklight77/raylib-arm/releases/tag/arm-5.5)
+  - [raylib-5.5_linux_arm64-drm.tar.gz](https://github.com/Sparklight77/raylib-arm/releases/download/arm-5.5/raylib-5.5_linux_arm64-drm.tar.gz)
 
+  - [raylib-5.5_linux_armv7-drm.tar.gz](https://github.com/Sparklight77/raylib-arm/releases/download/arm-5.5/raylib-5.5_linux_armv7-drm.tar.gz)
+
+
+- [Experimental (GitHub Actions)](https://github.com/Sparklight77/raylib-arm/actions/workflows/raylib-build.yml)
 
 
 > [!Warning]
