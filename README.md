@@ -1,10 +1,10 @@
-# Raylib ARM Cross-Builds for DRM Platforms
+# 🌠Raylib ARM Cross-Builds for DRM Platforms
 
 This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64** architectures targeting the **Direct Rendering Manager (DRM)** platform using **OpenGL ES 2**. It produces ready-to-use SDK tarballs including raylib static libraries and headers.
 
 ---
 
-## About 
+## 📚About 
 - Cross-compiles raylib for:
   - **ARMv7** (`arm-linux-gnueabihf`)
   - **ARM64** (`aarch64-linux-gnu`)
@@ -15,6 +15,9 @@ This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64
 
 
 ---
+
+## ⏬Download: 
+[Release](https://github.com/Sparklight77/raylib-arm/releases/tag/arm-5.5)
 
 
 
@@ -28,6 +31,6 @@ This repository contains **cross-compiled raylib** SDK for **ARMv7** and **ARM64
 > [!Important]
 > You can customize the workflow to add example builds or shared library outputs if needed. 
 
-## License
+## 🗞️License
 
 This workflow and tooling scripts follows raylib license. Nothing is changed at all.
