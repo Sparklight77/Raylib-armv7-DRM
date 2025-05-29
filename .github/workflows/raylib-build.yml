@@ -30,12 +30,23 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo dpkg --add-architecture armhf
+          sudo dpkg --add-architecture arm64
           sudo apt-get update
           sudo apt-get install -y \
             cmake ninja-build git tar \
             gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
             libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev build-essential xorg-dev
+            libx11-dev:armhf libx11-dev:arm64 \
+            libxrandr-dev:armhf libxrandr-dev:arm64 \
+            libxcursor-dev:armhf libxcursor-dev:arm64 \
+            libxi-dev:armhf libxi-dev:arm64 \
+            libxinerama-dev:armhf libxinerama-dev:arm64 \
+            libgl1-mesa-dev:armhf libgl1-mesa-dev:arm64 \
+            libglu1-mesa-dev:armhf libglu1-mesa-dev:arm64 \
+            libasound2-dev:armhf libasound2-dev:arm64 \
+            libwayland-dev libxkbcommon-dev \
+            build-essential xorg-dev
 
       - name: Build raylib for ${{ matrix.arch }}-${{ matrix.platform }}
         run: |
@@ -43,15 +54,17 @@ jobs:
           mkdir $BUILD_DIR
           cd $BUILD_DIR
 
-          PLATFORM_FLAGS="-DPLATFORM=${{ matrix.platform }}"
-          if [ "${{ matrix.platform }}" = "PLATFORM_DRM" ]; then
-            PLATFORM_FLAGS="$PLATFORM_FLAGS -DUSE_OPENGL_ES=ON"
+          # Apply platform-specific flags
+          if [ "${{ matrix.platform }}" = "DRM" ]; then
+            PLATFORM_FLAG="-DPLATFORM=DRM -DUSE_OPENGL_ES=ON"
+          else
+            PLATFORM_FLAG="-DPLATFORM=Desktop"
           fi
 
           cmake ../raylib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
             -DCMAKE_BUILD_TYPE=Release \
-            $PLATFORM_FLAGS \
+            $PLATFORM_FLAG \
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_EXAMPLES=OFF \
             -DBUILD_GAMES=OFF \
@@ -60,7 +73,7 @@ jobs:
 
       - name: Prepare SDK package
         run: |
-          PLATFORM_LOWER=$(echo "${{ matrix.platform }}" | tr '[:upper:]' '[:lower:]' | sed 's/platform_//')
+          PLATFORM_LOWER=$(echo "${{ matrix.platform }}" | tr '[:upper:]' '[:lower:]')
           SDK_DIR=raylib-${{ matrix.arch }}-${PLATFORM_LOWER}
           mkdir -p $SDK_DIR/include
           mkdir -p $SDK_DIR/lib
