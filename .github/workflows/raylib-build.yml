@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         arch: [armv7, arm64]
-        platform: [PLATFORM_DRM, PLATFORM_DESKTOP]
+        platform: [DRM, Desktop]
         include:
           - arch: armv7
             toolchain: Toolchain-armv7-linux-gnueabihf.cmake
