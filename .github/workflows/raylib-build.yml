@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-raylib:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         arch: [armv7, arm64]
