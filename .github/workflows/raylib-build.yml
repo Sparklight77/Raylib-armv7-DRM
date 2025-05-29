@@ -35,7 +35,7 @@ jobs:
             cmake ninja-build git tar \
             gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
             libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev build-essential xorg-devel xorg-dev
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libgl1-mesa-dev libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev build-essential xorg-dev
 
       - name: Build raylib for ${{ matrix.arch }}-${{ matrix.platform }}
         run: |
