@@ -1,91 +1,75 @@
-name: Cross-Build Raylib ARMv7 + ARM64 (DRM & DESKTOP)
+name: Cross-Build Raylib ARMv7 + ARM64 (Docker)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build-raylib:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        arch: [armv7, arm64]
-        platform: [DRM, Desktop]
-        include:
-          - arch: armv7
-            toolchain: Toolchain-armv7-linux-gnueabihf.cmake
-            triple: arm-linux-gnueabihf
-          - arch: arm64
-            toolchain: Toolchain-aarch64-linux-gnu.cmake
-            triple: aarch64-linux-gnu
 
-    name: Build raylib for ${{ matrix.arch }}-${{ matrix.platform }}
     steps:
-      - name: Checkout this repo (toolchain files)
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clone raylib (shallow)
-        run: git clone --depth 1 https://github.com/raysan5/raylib.git
+      - name: Build Docker image for cross-compilation
+        run: docker build -t raylib-cross -f Dockerfile.cross-raylib .
 
-      - name: Install dependencies
+      - name: Run cross-build in Docker container
         run: |
-          sudo dpkg --add-architecture armhf
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y \
-            cmake ninja-build git tar \
-            gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-            libx11-dev:armhf libx11-dev:arm64 \
-            libxrandr-dev \
-            libxcursor-dev \
-            libxi-dev \
-            libxinerama-dev \
-            libgl1-mesa-dev \
-            libglu1-mesa-dev\
-            libasound2-dev \
-            libwayland-dev libxkbcommon-dev \
-            build-essential xorg-dev
+          docker run --rm -v ${{ github.workspace }}:/build raylib-cross bash -c "
+            set -eux
 
-      - name: Build raylib for ${{ matrix.arch }}-${{ matrix.platform }}
-        run: |
-          BUILD_DIR=build-${{ matrix.arch }}-${{ matrix.platform }}
-          mkdir $BUILD_DIR
-          cd $BUILD_DIR
+            git clone --depth 1 https://github.com/raysan5/raylib.git
 
-          # Apply platform-specific flags
-          if [ "${{ matrix.platform }}" = "DRM" ]; then
-            PLATFORM_FLAG="-DPLATFORM=DRM -DUSE_OPENGL_ES=ON"
-          else
-            PLATFORM_FLAG="-DPLATFORM=Desktop"
-          fi
+            for arch in armv7 arm64; do
+              if [ \"\$arch\" = \"armv7\" ]; then
+                triple=arm-linux-gnueabihf
+                toolchain_file=/usr/share/cmake-*/Modules/Platform/Linux-ARM.cmake
+                target_arch=armhf
+              else
+                triple=aarch64-linux-gnu
+                toolchain_file=/usr/share/cmake-*/Modules/Platform/Linux-AARCH64.cmake
+                target_arch=arm64
+              fi
 
-          cmake ../raylib \
-            -DCMAKE_TOOLCHAIN_FILE=../cmake/${{ matrix.toolchain }} \
-            -DCMAKE_BUILD_TYPE=Release \
-            $PLATFORM_FLAG \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_EXAMPLES=OFF \
-            -DBUILD_GAMES=OFF \
-            -G Ninja
-          ninja
+              for platform in DRM Desktop; do
+                folder=build-\$arch-\$platform
+                mkdir \$folder && cd \$folder
 
-      - name: Prepare SDK package
-        run: |
-          PLATFORM_LOWER=$(echo "${{ matrix.platform }}" | tr '[:upper:]' '[:lower:]')
-          SDK_DIR=raylib-${{ matrix.arch }}-${PLATFORM_LOWER}
-          mkdir -p $SDK_DIR/include
-          mkdir -p $SDK_DIR/lib
-          cp -r raylib/src/*.h $SDK_DIR/include/
-          cp build-${{ matrix.arch }}-${{ matrix.platform }}/raylib/libraylib.a $SDK_DIR/lib/
-          DATE=$(date +"%d-%m-%Y")
-          FILENAME="${SDK_DIR}-${DATE}.tar.gz"
-          tar -czf "$FILENAME" $SDK_DIR
-          echo "SDK_FILENAME=$FILENAME" >> $GITHUB_ENV
+                extra_flags=""
+                if [ \"\$platform\" = \"PLATFORM_DRM\" ]; then
+                  extra_flags=\"-DUSE_OPENGL_ES=ON\"
+                fi
 
-      - name: Upload SDK artifact
+                cmake ../raylib \
+                  -DCMAKE_SYSTEM_NAME=Linux \
+                  -DCMAKE_SYSTEM_PROCESSOR=\$arch \
+                  -DCMAKE_C_COMPILER=\$triple-gcc \
+                  -DCMAKE_CXX_COMPILER=\$triple-g++ \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DPLATFORM=\$platform \
+                  \$extra_flags \
+                  -DBUILD_SHARED_LIBS=OFF \
+                  -DBUILD_EXAMPLES=OFF \
+                  -DBUILD_GAMES=OFF \
+                  -G Ninja
+                ninja
+
+                cd ..
+                sdk_dir=raylib-\$arch-\$(echo \$platform | tr '[:upper:]' '[:lower:]' | sed 's/platform_//')
+                mkdir -p \$sdk_dir/include \$sdk_dir/lib
+                cp -r raylib/src/*.h \$sdk_dir/include/
+                cp \$folder/raylib/libraylib.a \$sdk_dir/lib/
+
+                tar -czf \$sdk_dir.tar.gz \$sdk_dir
+              done
+            done
+          "
+
+      - name: Upload all SDKs
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.SDK_FILENAME }}
-          path: ${{ env.SDK_FILENAME }}
+          name: Raylib-SDKs
+          path: raylib-*.tar.gz
