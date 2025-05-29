@@ -1,0 +1,7 @@
+# Dockerfile.armv7
+FROM dockcross/linux-armv7
+
+RUN apt-get update && apt-get install -y \
+    libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
+    libx11-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev \
+    libxext-dev libxfixes-dev libxrender-dev
