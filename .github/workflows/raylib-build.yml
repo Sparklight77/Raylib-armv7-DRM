@@ -38,13 +38,13 @@ jobs:
             gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
             libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
             libx11-dev:armhf libx11-dev:arm64 \
-            libxrandr-dev:armhf libxrandr-dev:arm64 \
-            libxcursor-dev:armhf libxcursor-dev:arm64 \
-            libxi-dev:armhf libxi-dev:arm64 \
-            libxinerama-dev:armhf libxinerama-dev:arm64 \
-            libgl1-mesa-dev:armhf libgl1-mesa-dev:arm64 \
-            libglu1-mesa-dev:armhf libglu1-mesa-dev:arm64 \
-            libasound2-dev:armhf libasound2-dev:arm64 \
+            libxrandr-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev\
+            libasound2-dev \
             libwayland-dev libxkbcommon-dev \
             build-essential xorg-dev
 
