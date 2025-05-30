@@ -30,11 +30,14 @@ jobs:
 
       - name: Install dependencies + fetch libx11 manually
         run: |
+          set -e
+          sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  cmake ninja-build git tar \
-  gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
-  libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-  dpkg-dev wget || if [ $? -eq 8 ]; then echo "Ignoring exit code 8 from apt."; else exit $?; fi
+            cmake ninja-build git tar \
+            gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
+            libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
+            dpkg-dev wget || \
+          if [ $? -eq 8 ]; then echo "Ignoring harmless apt exit code 8 (service restart issues)."; else exit $?; fi
 
           ARCH=${{ matrix.arch }}
           if [ "$ARCH" = "armv7" ]; then
