@@ -35,7 +35,7 @@ jobs:
             cmake ninja-build git tar \
             gcc-${{ matrix.triple }} g++-${{ matrix.triple }} \
             libdrm-dev libgbm-dev libinput-dev libgles2-mesa-dev \
-            dpkg-dev wget
+            dpkg-dev wget || true
 
           ARCH=${{ matrix.arch }}
           if [ "$ARCH" = "armv7" ]; then
